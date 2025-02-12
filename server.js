@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://appleidmusic960:Dataking8@tapsidecluster.oeofi.mongodb.net/';
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://appleidmusic960:Dataking8@tapsidecluster.oeofi.mongodb.net/fileSharing';
 
 // Initialize MongoDB connection before setting up routes
 let gfs;
@@ -21,12 +21,15 @@ let upload;
 
 async function initMongoDB() {
     try {
-        await mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
-        const conn = mongoose.connection;
+        const conn = await mongoose.connect(mongoURI, { 
+            useNewUrlParser: true, 
+            useUnifiedTopology: true
+        });
         
         // Init GridFS after connection is established
-        gfs = Grid(conn.db, mongoose.mongo);
-        gfs.collection('uploads');
+        gfs = new mongoose.mongo.GridFSBucket(conn.connection.db, {
+            bucketName: 'uploads'
+        });
 
         // Create storage engine with file size limit (2GB like WeTransfer)
         const storage = new GridFsStorage({
@@ -129,9 +132,8 @@ app.post('/upload', async (req, res) => {
 // Enhanced file download endpoint
 app.get('/download/:fileId', async (req, res) => {
     try {
-        const file = await gfs.files.findOne({
-            'metadata.fileId': req.params.fileId
-        });
+        const files = await gfs.find({ 'metadata.fileId': req.params.fileId }).toArray();
+        const file = files[0];
         
         if (!file) {
             return res.status(404).json({ error: 'File not found' });
@@ -139,7 +141,7 @@ app.get('/download/:fileId', async (req, res) => {
 
         // Check if file has expired
         if (new Date() > new Date(file.metadata.expiryDate)) {
-            await gfs.remove({ _id: file._id, root: 'uploads' });
+            await gfs.delete(file._id);
             return res.status(410).json({ error: 'File has expired' });
         }
 
@@ -157,9 +159,10 @@ app.get('/download/:fileId', async (req, res) => {
         res.set('Content-Type', file.contentType);
         res.set('Content-Disposition', `attachment; filename="${file.metadata.originalName}"`);
 
-        const readstream = gfs.createReadStream(file.filename);
-        readstream.pipe(res);
+        const downloadStream = gfs.openDownloadStream(file._id);
+        downloadStream.pipe(res);
     } catch (error) {
+        console.error('Download error:', error);
         res.status(500).json({ error: 'Error downloading file' });
     }
 });
@@ -172,12 +175,12 @@ app.get('/', (req, res) => {
 // Enhanced file cleanup - delete expired files
 setInterval(async () => {
     try {
-        const expiredFiles = await gfs.files.find({
+        const expiredFiles = await gfs.find({
             'metadata.expiryDate': { $lt: new Date() }
         }).toArray();
         
         for (const file of expiredFiles) {
-            await gfs.remove({ _id: file._id, root: 'uploads' });
+            await gfs.delete(file._id);
         }
     } catch (error) {
         console.error('Error cleaning up expired files:', error);

@@ -21,7 +21,7 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
     if (senderEmail) formData.append('senderEmail', senderEmail);
     if (recipientEmail) formData.append('recipientEmail', recipientEmail);
     if (message) formData.append('message', message);
-    if (maxDownloads) formData.append('maxDownloads', maxDownloads);
+    if (maxDownloads) formData.append('maxDownloads', parseInt(maxDownloads) || 0);
 
     try {
         // Show upload progress
@@ -33,6 +33,10 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
             method: 'POST',
             body: formData
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const result = await response.json();
         if (result.success) {
@@ -47,7 +51,7 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
     } catch (error) {
         console.error('Error uploading file:', error);
         document.getElementById('uploadFallback').classList.remove('hidden');
-        document.getElementById('senderStatus').innerText = 'Direct upload failed. Please try the fallback upload.';
+        document.getElementById('senderStatus').innerText = 'Upload failed: ' + error.message;
         document.getElementById('progressBar').style.width = '0%';
     }
 });
@@ -62,11 +66,8 @@ window.addEventListener('load', async () => {
         document.getElementById('receiveSection').classList.remove('hidden');
 
         try {
-            // Verify file exists and is available
-            const response = await fetch(`/download/${fileId}`, {
-                method: 'HEAD'
-            });
-
+            const response = await fetch(`/download/${fileId}`);
+            
             if (response.ok) {
                 const downloadLink = document.getElementById('downloadLink');
                 downloadLink.href = `/download/${fileId}`;
@@ -80,6 +81,7 @@ window.addEventListener('load', async () => {
                 document.getElementById('progressBar').style.width = '0%';
             }
         } catch (error) {
+            console.error('Error accessing file:', error);
             document.getElementById('receiverStatus').innerText = 'Error accessing file';
             document.getElementById('progressBar').style.width = '0%';
         }
