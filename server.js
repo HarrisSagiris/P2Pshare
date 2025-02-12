@@ -4,6 +4,8 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 const socketIo = require('socket.io');
+const multer = require('multer');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -16,8 +18,54 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = 'uploads';
+        if (!fs.existsSync(uploadDir)){
+            fs.mkdirSync(uploadDir);
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, uuidv4() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
 // Serve static files from 'public' directory
 app.use(express.static('public'));
+
+// Handle file upload
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const fileId = path.basename(req.file.filename, path.extname(req.file.filename));
+    res.json({ 
+        success: true,
+        fileId: fileId,
+        message: 'File uploaded successfully'
+    });
+});
+
+// Handle file download
+app.get('/api/download/:fileId', (req, res) => {
+    const fileId = req.params.fileId;
+    const uploadDir = 'uploads';
+    
+    // Find the file with matching ID
+    const files = fs.readdirSync(uploadDir);
+    const file = files.find(f => f.startsWith(fileId));
+    
+    if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+    }
+    
+    res.download(path.join(uploadDir, file));
+});
 
 // Store active rooms
 const rooms = new Map();
