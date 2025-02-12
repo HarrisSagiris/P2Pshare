@@ -8,9 +8,13 @@ const { GridFsStorage } = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
+
+// Enable CORS
+app.use(cors());
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://appleidmusic960:Dataking8@tapsidecluster.oeofi.mongodb.net/fileSharing';
@@ -85,48 +89,54 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from 'public' directory
 app.use(express.static('public'));
 
-// Enhanced file upload endpoint
+// Enhanced file upload endpoint with error handling
 app.post('/upload', async (req, res) => {
-    if (!upload) {
-        return res.status(500).json({ error: 'Storage not initialized' });
-    }
-    
-    upload.single('file')(req, res, async (err) => {
-        if (err) {
-            return res.status(400).json({ error: err.message });
+    try {
+        if (!upload) {
+            return res.status(500).json({ error: 'Storage not initialized' });
         }
         
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-
-        const fileId = req.file.metadata.fileId;
-        const downloadLink = `${req.protocol}://${req.get('host')}/download/${fileId}`;
-
-        // Send email to recipient if email is provided
-        if (req.body.recipientEmail) {
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: req.body.recipientEmail,
-                subject: `${req.body.senderEmail || 'Someone'} sent you a file`,
-                html: `
-                    <h2>You've received a file!</h2>
-                    <p>${req.body.message || ''}</p>
-                    <p>File: ${req.file.metadata.originalName}</p>
-                    <p>Download link: <a href="${downloadLink}">${downloadLink}</a></p>
-                    <p>This link will expire in 7 days.</p>
-                `
-            };
-
-            try {
-                await transporter.sendMail(mailOptions);
-            } catch (error) {
-                console.error('Error sending email:', error);
+        upload.single('file')(req, res, async (err) => {
+            if (err) {
+                console.error('Upload error:', err);
+                return res.status(400).json({ error: err.message });
             }
-        }
+            
+            if (!req.file) {
+                return res.status(400).json({ error: 'No file uploaded' });
+            }
 
-        res.json({ success: true, downloadLink });
-    });
+            const fileId = req.file.metadata.fileId;
+            const downloadLink = `${req.protocol}://${req.get('host')}/download/${fileId}`;
+
+            // Send email to recipient if email is provided
+            if (req.body.recipientEmail) {
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: req.body.recipientEmail,
+                    subject: `${req.body.senderEmail || 'Someone'} sent you a file`,
+                    html: `
+                        <h2>You've received a file!</h2>
+                        <p>${req.body.message || ''}</p>
+                        <p>File: ${req.file.metadata.originalName}</p>
+                        <p>Download link: <a href="${downloadLink}">${downloadLink}</a></p>
+                        <p>This link will expire in 7 days.</p>
+                    `
+                };
+
+                try {
+                    await transporter.sendMail(mailOptions);
+                } catch (error) {
+                    console.error('Error sending email:', error);
+                }
+            }
+
+            res.json({ success: true, downloadLink });
+        });
+    } catch (error) {
+        console.error('Server error during upload:', error);
+        res.status(500).json({ error: 'Internal server error during upload' });
+    }
 });
 
 // Enhanced file download endpoint
