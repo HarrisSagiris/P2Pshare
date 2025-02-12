@@ -11,46 +11,93 @@ const peer = new RTCPeerConnection({
 let dataChannel;
 let fileToSend = null;
 const CHUNK_SIZE = 16384;
+let roomId = null;
+let peerId = null;
 
 // Handle WebSocket messages
 ws.onmessage = async (event) => {
     const data = JSON.parse(event.data);
     
-    if (data.type === 'offer') {
-        // Handle incoming offer
-        document.getElementById('receiveSection').classList.remove('hidden');
-        await peer.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await peer.createAnswer();
-        await peer.setLocalDescription(answer);
-        
-        // Send answer back through WebSocket
-        ws.send(JSON.stringify({
-            type: 'answer',
-            answer: answer
-        }));
-    } 
-    else if (data.type === 'answer') {
-        await peer.setRemoteDescription(new RTCSessionDescription(data.answer));
-    }
-    else if (data.type === 'ice-candidate') {
-        try {
-            await peer.addIceCandidate(data.candidate);
-        } catch (e) {
-            console.error('Error adding received ice candidate', e);
-        }
+    switch(data.type) {
+        case 'room-created':
+            roomId = data.roomId;
+            // Display room ID for sharing
+            const shareLink = document.getElementById('shareLink');
+            shareLink.value = `${window.location.origin}?room=${roomId}`;
+            break;
+
+        case 'peer-joined':
+            peerId = data.peerId;
+            // Create and send offer when peer joins
+            dataChannel = peer.createDataChannel("fileTransfer");
+            dataChannel.binaryType = "arraybuffer";
+            setupSenderDataChannel(dataChannel);
+
+            const offer = await peer.createOffer();
+            await peer.setLocalDescription(offer);
+            ws.send(JSON.stringify({
+                type: 'offer',
+                target: peerId,
+                data: offer
+            }));
+            break;
+
+        case 'offer':
+            document.getElementById('receiveSection').classList.remove('hidden');
+            await peer.setRemoteDescription(new RTCSessionDescription(data.data));
+            const answer = await peer.createAnswer();
+            await peer.setLocalDescription(answer);
+            
+            ws.send(JSON.stringify({
+                type: 'answer',
+                target: data.sender,
+                data: answer
+            }));
+            break;
+
+        case 'answer':
+            await peer.setRemoteDescription(new RTCSessionDescription(data.data));
+            break;
+
+        case 'ice-candidate':
+            try {
+                await peer.addIceCandidate(data.data);
+            } catch (e) {
+                console.error('Error adding received ice candidate', e);
+            }
+            break;
+
+        case 'host-disconnected':
+            alert('Host disconnected');
+            location.reload();
+            break;
     }
 };
 
 // Handle ICE candidates
 peer.onicecandidate = (event) => {
     if (event.candidate) {
-        // Send ICE candidate through WebSocket
         ws.send(JSON.stringify({
             type: 'ice-candidate',
-            candidate: event.candidate
+            target: peerId,
+            data: event.candidate
         }));
     }
 };
+
+// Check URL for room ID and join if present
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
+    if (roomParam) {
+        ws.onopen = () => {
+            ws.send(JSON.stringify({
+                type: 'join-room',
+                roomId: roomParam
+            }));
+        };
+    }
+});
 
 // Handle file selection and sharing
 document.getElementById('shareBtn').addEventListener('click', async () => {
@@ -61,25 +108,13 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
     }
 
     fileToSend = fileInput.files[0];
-    dataChannel = peer.createDataChannel("fileTransfer");
-    dataChannel.binaryType = "arraybuffer";
-    setupSenderDataChannel(dataChannel);
+    
+    // Create new room
+    ws.send(JSON.stringify({
+        type: 'create-room'
+    }));
 
-    try {
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-        
-        // Send offer through WebSocket
-        ws.send(JSON.stringify({
-            type: 'offer',
-            offer: offer
-        }));
-
-        document.getElementById('result').classList.remove('hidden');
-    } catch (err) {
-        console.error("Error creating offer:", err);
-        alert("Failed to create connection. Please try again.");
-    }
+    document.getElementById('result').classList.remove('hidden');
 });
 
 function setupSenderDataChannel(channel) {
