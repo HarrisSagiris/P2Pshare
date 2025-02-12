@@ -1,8 +1,38 @@
 # P2PShare - Peer-to-Peer File Sharing
 
+
+
+
+
+
+
+---
+
+## 📜 Paper Link 🔍
+
+[Read the Paper](your-paper-link)
+
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Model Summary](#model-summary)
+3. [Model Downloads](#model-downloads)
+4. [Evaluation Results](#evaluation-results)
+5. [Chat Website & API Platform](#chat-website--api-platform)
+6. [How to Run Locally](#how-to-run-locally)
+7. [License](#license)
+8. [Citation](#citation)
+9. [Contact](#contact)
+
+---
+
+## 📌 Introduction
+
 P2PShare is a **lightweight, secure, and instant peer-to-peer file sharing** tool that enables users to transfer files directly between devices without signups or servers. Using WebRTC technology, P2PShare establishes a direct connection between peers, ensuring **fast and private** file transfers.
 
-## 🚀 Features
+## 📌 Model Summary
 
 - 🔄 **Instant File Transfers** – Send and receive files without intermediaries.
 - 🔒 **End-to-End Encryption** – Ensuring privacy and security.
@@ -10,43 +40,48 @@ P2PShare is a **lightweight, secure, and instant peer-to-peer file sharing** too
 - 📱 **QR Code Transfers** – Easily connect devices by scanning a QR code.
 - 💻 **Cross-Platform Support** – Works on desktop and mobile browsers.
 
-## 🛠️ How It Works
+## 📌 Model Downloads
 
 1. Open P2PShare in your browser.
 2. Select a file to share.
 3. A unique share link and QR code are generated.
 4. The recipient opens the link or scans the QR code to download the file directly.
 
-## 🔧 Tech Stack
+## 📌 Evaluation Results
 
-- **Frontend:** HTML, CSS, JavaScript, Electron.js (for desktop app)
-- **Backend:** WebRTC (peer-to-peer communication)
-- **Security:** AES-256 Encryption
+Details about speed, security, and performance benchmarks.
 
-## 📥 Installation (For Self-Hosting)
+## 📌 Chat Website & API Platform
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/HarrisSagiris/P2Pshare
-   cd P2PShare
-   ```
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Start the development server:
-   ```sh
-   npm start
-   ```
+Interact with the platform using the web-based interface or API endpoints.
 
-## 🌍 Live Demo
-Try it out: [P2PShare Live](https://your-live-demo-link.com)
+## 📌 How to Run Locally
 
-## 🤝 Contributing
-Contributions are welcome! Feel free to fork this repository, submit issues, or create pull requests.
+```sh
+git clone https://github.com/HarrisSagiris/P2Pshare
+cd P2PShare
+npm install
+npm start
+```
 
-## 📜 License
+## 📌 License
+
 MIT License. See [LICENSE](LICENSE) for details.
 
----
-🔗 **Connect with us:** [Twitter](https://twitter.com/dev.harris) | [Discord]([https://discord.gg/yourserver](https://discord.gg/yCY4FTMPdK))
+## 📌 Citation
+
+If you use P2PShare in your research, please cite:
+
+```
+@article{P2PShare2025,
+  author    = @Devharris ,
+  title     = {P2PShare: Secure Peer-to-Peer File Sharing},
+  journal   = {ArXiv},
+  year      = {2025}
+}
+```
+
+## 📌 Contact
+
+For questions or contributions, reach out via [Discord](your-discord-link) or [Twitter](your-twitter-link).
+
