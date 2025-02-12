@@ -6,84 +6,119 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
         return;
     }
 
-    fileToSend = fileInput.files[0];
+    const fileToSend = fileInput.files[0];
     
-    // Upload file to server with metadata
-    const formData = new FormData();
-    formData.append('file', fileToSend);
+    // Create WebRTC room as host
+    const socket = io();
     
-    // Optional metadata fields
-    const senderEmail = prompt('Enter your email (optional):');
-    const recipientEmail = prompt('Enter recipient email (optional):');
-    const message = prompt('Enter a message (optional):');
-    const maxDownloads = prompt('Enter maximum number of downloads (0 for unlimited):');
+    socket.emit('create-room');
 
-    if (senderEmail) formData.append('senderEmail', senderEmail);
-    if (recipientEmail) formData.append('recipientEmail', recipientEmail);
-    if (message) formData.append('message', message);
-    if (maxDownloads) formData.append('maxDownloads', parseInt(maxDownloads) || 0);
-
-    try {
-        // Show upload progress
+    socket.on('room-created', (roomId) => {
+        // Show sharing UI
         document.getElementById('result').classList.remove('hidden');
-        document.getElementById('senderStatus').innerText = 'Uploading file...';
-        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('senderStatus').innerText = 'Waiting for receiver to connect...';
+        
+        // Set share link
+        const shareLink = document.getElementById('shareLink');
+        shareLink.value = `${window.location.origin}?room=${roomId}`;
+    });
 
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
+    // Handle peer joining
+    socket.on('peer-joined', async (peerId) => {
+        document.getElementById('senderStatus').innerText = 'Receiver connected, starting transfer...';
+        
+        // Create peer connection
+        const peerConnection = new RTCPeerConnection();
+        
+        // Create data channel
+        const dataChannel = peerConnection.createDataChannel('fileTransfer');
+        
+        // Handle data channel open
+        dataChannel.onopen = () => {
+            // Start file transfer
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                dataChannel.send(e.target.result);
+                document.getElementById('senderStatus').innerText = 'Transfer complete!';
+                document.getElementById('progressBar').style.width = '100%';
+            };
+            reader.readAsArrayBuffer(fileToSend);
+        };
+
+        // Create and send offer
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit('signal', {
+            peerId: peerId,
+            signal: offer
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // Handle answer
+        socket.on('signal', async ({ signal }) => {
+            await peerConnection.setRemoteDescription(signal);
+        });
+    });
 
-        const result = await response.json();
-        if (result.success) {
-            const shareLink = document.getElementById('shareLink');
-            shareLink.value = result.downloadLink;
-            document.getElementById('progressBar').style.width = '100%';
-            document.getElementById('senderStatus').innerText = 'File uploaded successfully!' + 
-                (recipientEmail ? ' Email notification sent to recipient.' : '');
-        } else {
-            throw new Error(result.error || 'Upload failed');
-        }
-    } catch (error) {
-        console.error('Error uploading file:', error);
-        document.getElementById('uploadFallback').classList.remove('hidden');
-        document.getElementById('senderStatus').innerText = 'Upload failed: ' + error.message;
-        document.getElementById('progressBar').style.width = '0%';
-    }
+    socket.on('peer-disconnected', () => {
+        document.getElementById('senderStatus').innerText = 'Receiver disconnected';
+    });
 });
 
-// Check URL for download link
+// Check URL for room ID
 window.addEventListener('load', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const fileId = urlParams.get('file');
+    const roomId = urlParams.get('room');
     
-    if (fileId) {
+    if (roomId) {
         document.getElementById('hostSection').classList.add('hidden');
         document.getElementById('receiveSection').classList.remove('hidden');
 
-        try {
-            const response = await fetch(`/download/${fileId}`);
+        const socket = io();
+        socket.emit('join-room', roomId);
+
+        socket.on('error', (error) => {
+            document.getElementById('receiverStatus').innerText = error;
+        });
+
+        // Handle WebRTC connection
+        const peerConnection = new RTCPeerConnection();
+
+        peerConnection.ondatachannel = (event) => {
+            const dataChannel = event.channel;
             
-            if (response.ok) {
+            // Handle incoming file data
+            const chunks = [];
+            dataChannel.onmessage = (e) => {
+                chunks.push(e.data);
+                document.getElementById('progressBar').style.width = '50%';
+            };
+
+            dataChannel.onclose = () => {
+                // Create blob from received chunks
+                const blob = new Blob(chunks);
                 const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = `/download/${fileId}`;
+                downloadLink.href = URL.createObjectURL(blob);
                 downloadLink.classList.remove('hidden');
-                downloadLink.innerText = 'Download Securely';
-                document.getElementById('receiverStatus').innerText = 'Your file is ready for secure download!';
+                document.getElementById('receiverStatus').innerText = 'Transfer complete!';
                 document.getElementById('progressBar').style.width = '100%';
-            } else {
-                const error = await response.json();
-                document.getElementById('receiverStatus').innerText = error.error || 'File not available';
-                document.getElementById('progressBar').style.width = '0%';
+            };
+        };
+
+        // Handle WebRTC signaling
+        socket.on('signal', async ({ peerId, signal }) => {
+            if (signal.type === 'offer') {
+                await peerConnection.setRemoteDescription(signal);
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit('signal', {
+                    peerId: peerId,
+                    signal: answer
+                });
             }
-        } catch (error) {
-            console.error('Error accessing file:', error);
-            document.getElementById('receiverStatus').innerText = 'Error accessing file';
-            document.getElementById('progressBar').style.width = '0%';
-        }
+        });
+
+        socket.on('host-disconnected', () => {
+            document.getElementById('receiverStatus').innerText = 'Host disconnected';
+        });
     }
 });

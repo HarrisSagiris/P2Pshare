@@ -8,23 +8,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #0066FF;
-            --primary-hover: #0052CC;
-            --primary-light: #E6F0FF;
-            --secondary-color: #667085;
-            --success-color: #12B76A;
-            --error-color: #F04438;
-            --background-color: #F9FAFB;
-            --surface-color: #FFFFFF;
-            --text-primary: #1D2939;
-            --text-secondary: #475467;
-            --border-color: #E5E7EB;
+            --primary-color: #3B82F6;
+            --primary-hover: #2563EB;
+            --primary-light: rgba(59, 130, 246, 0.1);
+            --secondary-color: #9CA3AF;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --background-color: #111827;
+            --surface-color: #1F2937;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --border-color: #374151;
             --border-radius-sm: 8px;
             --border-radius: 12px;
             --border-radius-lg: 16px;
-            --box-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
-            --box-shadow: 0 4px 6px -1px rgba(16, 24, 40, 0.1), 0 2px 4px -1px rgba(16, 24, 40, 0.06);
-            --box-shadow-lg: 0 20px 25px -5px rgba(16, 24, 40, 0.1), 0 10px 10px -5px rgba(16, 24, 40, 0.04);
+            --box-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --box-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
             --transition: all 0.2s ease;
         }
 
@@ -62,7 +62,7 @@
             font-weight: 700;
             text-align: center;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), #3B82F6);
+            background: linear-gradient(135deg, var(--primary-color), #60A5FA);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
@@ -83,7 +83,7 @@
             border-radius: var(--border-radius);
             padding: 2.5rem;
             text-align: center;
-            background: var(--background-color);
+            background: rgba(31, 41, 55, 0.5);
             transition: var(--transition);
             margin-bottom: 2rem;
         }
@@ -107,7 +107,7 @@
         }
 
         .upload-area:hover {
-            background: rgba(0, 102, 255, 0.04);
+            background: rgba(59, 130, 246, 0.1);
         }
 
         .upload-icon {
@@ -172,7 +172,7 @@
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), #3B82F6);
+            background: linear-gradient(90deg, var(--primary-color), #60A5FA);
             transition: width 0.3s ease;
             border-radius: 100px;
         }
@@ -204,7 +204,7 @@
         .share-option {
             padding: 1rem;
             border-radius: var(--border-radius-sm);
-            background: var(--background-color);
+            background: rgba(31, 41, 55, 0.5);
             border: 1px solid var(--border-color);
             cursor: pointer;
             transition: var(--transition);
@@ -237,7 +237,7 @@
             border-radius: var(--border-radius-sm);
             font-size: 0.9375rem;
             color: var(--text-primary);
-            background: var(--background-color);
+            background: rgba(31, 41, 55, 0.5);
             transition: var(--transition);
             font-family: inherit;
         }
@@ -249,7 +249,7 @@
         }
 
         .overlay {
-            background: rgba(16, 24, 40, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(4px);
         }
 
@@ -259,7 +259,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 1.5rem;
-            background: var(--surface-color);
+            background: rgba(31, 41, 55, 0.5);
             border-radius: var(--border-radius);
             border: 1px solid var(--border-color);
             margin: 1rem 0;
@@ -282,6 +282,10 @@
         .file-size {
             color: var(--text-secondary);
             font-size: 0.875rem;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         @media (max-width: 768px) {
@@ -404,10 +408,12 @@
     </div>
 
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 
     <script>
-                const urlParams = new URLSearchParams(window.location.search);
+        const socket = io();
+        const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('room');
         const fileId = urlParams.get('file');
 
@@ -417,7 +423,7 @@
             
             if (fileId) {
                 const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = `/download/${fileId}`;
+                downloadLink.href = `/api/download/${fileId}`;
                 downloadLink.classList.remove('hidden');
                 downloadLink.innerText = 'Download File';
                 document.getElementById('receiverStatus').innerText = 'Your file is ready for download';
@@ -475,16 +481,14 @@
         function updateFilePreview(file) {
             if (!file) return;
             
-            const span = uploadArea.querySelector('span');
-            span.innerHTML = `
+            const uploadArea = document.querySelector('.upload-area');
+            uploadArea.innerHTML = `
                 <div class="file-preview">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="#0066FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="file-preview-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V9L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <div style="font-size: 0.875rem; margin: 0.5rem 0; font-weight: 500; color: var(--text-color);">${file.name}</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem;">
-                        ${formatFileSize(file.size)}
-                    </div>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
                 </div>
             `;
         }
@@ -497,38 +501,34 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
 
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const submitButton = e.target.querySelector('button');
-            submitButton.disabled = true;
-            submitButton.innerText = 'Uploading...';
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
 
             try {
-                const response = await fetch('/upload', {
+                document.getElementById('result').classList.remove('hidden');
+                const response = await fetch('/api/upload', {
                     method: 'POST',
                     body: formData
                 });
-                const result = await response.json();
-                if (result.success) {
-                    document.getElementById('uploadResult').innerHTML = `
-                        <div style="background: #ECFDF5; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                            File uploaded successfully! 
-                            <a href="${result.downloadLink}" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Download Link</a>
-                        </div>
-                    `;
+
+                const data = await response.json();
+                if (data.success) {
+                    const shareLink = `${window.location.origin}/download/${data.fileId}`;
+                    document.getElementById('shareLink').value = shareLink;
+                    document.getElementById('progressBar').style.width = '100%';
                 }
             } catch (error) {
                 console.error('Upload failed:', error);
-                document.getElementById('uploadResult').innerHTML = `
-                    <div style="background: #FEF2F2; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                        Upload failed. Please try again.
-                    </div>
-                `;
-            } finally {
-                submitButton.disabled = false;
-                submitButton.innerText = 'Upload';
+                document.getElementById('senderStatus').innerText = 'Upload failed. Please try again.';
             }
+        });
+
+        socket.on('upload-progress', (progress) => {
+            document.getElementById('progressBar').style.width = `${progress}%`;
         });
     </script>
 </body>
