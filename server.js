@@ -4,7 +4,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const mongoose = require('mongoose');
 const multer = require('multer');
-const { GridFsStorage } = require('multer-gridfs-storage'); // Fixed import
+const { GridFsStorage } = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
 const crypto = require('crypto');
 
@@ -28,23 +28,18 @@ const storage = new GridFsStorage({
     url: mongoURI,
     file: (req, file) => {
         return new Promise((resolve, reject) => {
-            crypto.randomBytes(16, (err, buf) => {
-                if (err) {
-                    return reject(err);
+            const fileId = uuidv4();
+            const filename = fileId + path.extname(file.originalname);
+            const fileInfo = {
+                filename: filename,
+                bucketName: 'uploads',
+                metadata: {
+                    originalName: file.originalname,
+                    uploadDate: new Date(),
+                    fileId: fileId
                 }
-                const fileId = uuidv4();
-                const filename = fileId + path.extname(file.originalname);
-                const fileInfo = {
-                    filename: filename,
-                    bucketName: 'uploads',
-                    metadata: {
-                        originalName: file.originalname,
-                        uploadDate: new Date(),
-                        fileId: fileId
-                    }
-                };
-                resolve(fileInfo);
-            });
+            };
+            resolve(fileInfo);
         });
     }
 });
@@ -56,6 +51,9 @@ app.use(express.static('public'));
 
 // File upload endpoint
 app.post('/upload', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
     const fileId = req.file.metadata.fileId;
     const downloadLink = `${req.protocol}://${req.get('host')}/download/${fileId}`;
     res.json({ success: true, downloadLink });
