@@ -26,6 +26,7 @@
                 <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
             </div>
             <div id="qrCode"></div>
+            <p id="connectionStatus"></p>
         </div>
 
         <div id="receiveSection" class="hidden">
@@ -33,6 +34,8 @@
             <div class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
                 <p id="receiverStatus">Waiting for connection...</p>
+                <p id="transferSpeed"></p>
+                <p id="timeRemaining"></p>
             </div>
             <a id="downloadLink" class="hidden download-button" download>Download File</a>
         </div>
@@ -54,7 +57,7 @@
             }, 2000);
         }
 
-        // Add drag and drop functionality
+        // Add drag and drop functionality with live preview
         const uploadArea = document.querySelector('.upload-area');
         const fileInput = document.getElementById('fileInput');
 
@@ -71,7 +74,72 @@
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             fileInput.files = e.dataTransfer.files;
+            updateFilePreview(e.dataTransfer.files[0]);
         });
+
+        fileInput.addEventListener('change', (e) => {
+            updateFilePreview(e.target.files[0]);
+        });
+
+        function updateFilePreview(file) {
+            if (!file) return;
+            
+            const span = uploadArea.querySelector('span');
+            span.innerHTML = `
+                📂 Selected: ${file.name}<br>
+                Size: ${formatFileSize(file.size)}<br>
+                Type: ${file.type || 'Unknown'}
+            `;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Add live connection status updates
+        const connectionStatus = document.getElementById('connectionStatus');
+        const transferSpeed = document.getElementById('transferSpeed');
+        const timeRemaining = document.getElementById('timeRemaining');
+        let startTime;
+        let lastUpdate = Date.now();
+        let lastBytes = 0;
+
+        function updateTransferStats(receivedSize, totalSize) {
+            if (!startTime) startTime = Date.now();
+            
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - lastUpdate) / 1000; // in seconds
+            const bytesDiff = receivedSize - lastBytes;
+            const speed = bytesDiff / timeDiff; // bytes per second
+            
+            const remainingBytes = totalSize - receivedSize;
+            const remainingTime = remainingBytes / speed;
+
+            transferSpeed.textContent = `Speed: ${formatFileSize(speed)}/s`;
+            timeRemaining.textContent = `Time remaining: ${formatTime(remainingTime)}`;
+
+            lastUpdate = currentTime;
+            lastBytes = receivedSize;
+        }
+
+        function formatTime(seconds) {
+            if (!isFinite(seconds)) return 'Calculating...';
+            if (seconds < 60) return `${Math.round(seconds)}s`;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.round(seconds % 60);
+            return `${minutes}m ${remainingSeconds}s`;
+        }
+
+        // Update connection status based on peer connection state
+        if (typeof peer !== 'undefined') {
+            peer.onconnectionstatechange = () => {
+                connectionStatus.textContent = `Connection Status: ${peer.connectionState}`;
+            };
+        }
     </script>
 </body>
 </html>

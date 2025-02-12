@@ -5,20 +5,21 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #f5f7fb;
-    color: #2d333a;
+    background: #1a1b1e;
+    color: #e4e6eb;
     text-align: center;
     margin: 0;
 }
 
 /* Container */
 .container {
-    background: white;
+    background: #25262b;
     padding: 40px;
     border-radius: 24px;
-    box-shadow: 0 12px 48px rgba(26, 33, 52, 0.07);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
     width: 95%;
     max-width: 600px;
+    border: 1px solid #2c2e33;
 }
 
 /* Upload Box */
@@ -32,24 +33,24 @@ body {
     justify-content: center;
     align-items: center;
     height: 220px;
-    background: #ffffff;
-    border: 2px dashed #e0e4e8;
+    background: #2c2e33;
+    border: 2px dashed #404348;
     border-radius: 16px;
     cursor: pointer;
     font-size: 18px;
     padding: 24px;
     transition: all 0.2s ease;
-    color: #687787;
+    color: #a6aab4;
 }
 
 .upload-area:hover {
-    background: #f9fafc;
-    border-color: #409fff;
+    background: #333539;
+    border-color: #7c5cff;
 }
 
 .dragover {
-    background: #f0f7ff !important;
-    border-color: #409fff !important;
+    background: #2b2640 !important;
+    border-color: #7c5cff !important;
 }
 
 /* Button */
@@ -57,20 +58,20 @@ button {
     margin-top: 16px;
     padding: 16px 32px;
     border: none;
-    background: #409fff;
+    background: linear-gradient(135deg, #7c5cff 0%, #6346e5 100%);
     color: white;
     cursor: pointer;
     border-radius: 32px;
     font-size: 16px;
     font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(64, 159, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
 }
 
 button:hover {
-    background: #1a85ff;
+    background: linear-gradient(135deg, #8d71ff 0%, #735bf2 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(64, 159, 255, 0.3);
+    box-shadow: 0 6px 16px rgba(124, 92, 255, 0.4);
 }
 
 /* Results */
@@ -81,27 +82,28 @@ button:hover {
 #shareLink {
     width: 100%;
     padding: 16px;
-    border: 2px solid #e0e4e8;
+    border: 2px solid #404348;
     border-radius: 12px;
     text-align: center;
     font-size: 15px;
-    color: #2d333a;
-    background: #f9fafc;
+    color: #e4e6eb;
+    background: #2c2e33;
     transition: all 0.2s ease;
 }
 
 #shareLink:focus {
     outline: none;
-    border-color: #409fff;
-    background: #ffffff;
+    border-color: #7c5cff;
+    background: #333539;
 }
 
 #qrCode {
     margin-top: 24px;
     padding: 16px;
-    background: white;
+    background: #2c2e33;
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(26, 33, 52, 0.07);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid #404348;
 }
 
 .hidden {
@@ -111,15 +113,16 @@ button:hover {
 /* Progress Bar */
 .progress-container {
     margin: 24px 0;
-    background: #f0f7ff;
+    background: #2c2e33;
     border-radius: 12px;
     overflow: hidden;
+    border: 1px solid #404348;
 }
 
 .progress-bar {
     width: 0%;
     height: 8px;
-    background: linear-gradient(90deg, #409fff, #1a85ff);
+    background: linear-gradient(90deg, #7c5cff, #6346e5);
     transition: width 0.3s ease;
 }
 
@@ -127,16 +130,16 @@ button:hover {
     display: inline-block;
     text-decoration: none;
     padding: 16px 32px;
-    background: #409fff;
+    background: linear-gradient(135deg, #7c5cff 0%, #6346e5 100%);
     color: white;
     border-radius: 32px;
     font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(64, 159, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(124, 92, 255, 0.3);
 }
 
 .download-button:hover {
-    background: #1a85ff;
+    background: linear-gradient(135deg, #8d71ff 0%, #735bf2 100%);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(64, 159, 255, 0.3);
+    box-shadow: 0 6px 16px rgba(124, 92, 255, 0.4);
 }
