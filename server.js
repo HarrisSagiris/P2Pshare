@@ -28,7 +28,9 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        cb(null, uuidv4() + path.extname(file.originalname));
+        const fileId = uuidv4();
+        // Store with format: fileId_originalname
+        cb(null, `${fileId}_${file.originalname}`);
     }
 });
 
@@ -43,7 +45,8 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         return res.status(400).json({ error: 'No file uploaded' });
     }
     
-    const fileId = path.basename(req.file.filename, path.extname(req.file.filename));
+    // Extract fileId from the saved filename (everything before the underscore)
+    const fileId = req.file.filename.split('_')[0];
     res.json({ 
         success: true,
         fileId: fileId,
@@ -58,13 +61,17 @@ app.get('/api/download/:fileId', (req, res) => {
     
     // Find the file with matching ID
     const files = fs.readdirSync(uploadDir);
-    const file = files.find(f => f.startsWith(fileId));
+    const file = files.find(f => f.startsWith(fileId + '_'));
     
     if (!file) {
         return res.status(404).json({ error: 'File not found' });
     }
     
-    res.download(path.join(uploadDir, file));
+    // Extract original filename (everything after the underscore)
+    const originalName = file.split('_').slice(1).join('_');
+    
+    // Send file with its original name
+    res.download(path.join(uploadDir, file), originalName);
 });
 
 // Store active rooms
