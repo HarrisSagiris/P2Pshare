@@ -14,8 +14,57 @@ const server = http.createServer(app);
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://appleidmusic960:Dataking8@tapsidecluster.oeofi.mongodb.net/';
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
-const conn = mongoose.connection;
+
+// Initialize MongoDB connection before setting up routes
+let gfs;
+let upload;
+
+async function initMongoDB() {
+    try {
+        await mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
+        const conn = mongoose.connection;
+        
+        // Init GridFS after connection is established
+        gfs = Grid(conn.db, mongoose.mongo);
+        gfs.collection('uploads');
+
+        // Create storage engine with file size limit (2GB like WeTransfer)
+        const storage = new GridFsStorage({
+            url: mongoURI,
+            file: (req, file) => {
+                return new Promise((resolve, reject) => {
+                    const fileId = uuidv4();
+                    const filename = fileId + path.extname(file.originalname);
+                    const fileInfo = {
+                        filename: filename,
+                        bucketName: 'uploads',
+                        metadata: {
+                            originalName: file.originalname,
+                            uploadDate: new Date(),
+                            fileId: fileId,
+                            expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+                            downloads: 0,
+                            maxDownloads: req.body.maxDownloads || 0, // 0 means unlimited
+                            senderEmail: req.body.senderEmail,
+                            recipientEmail: req.body.recipientEmail,
+                            message: req.body.message
+                        }
+                    };
+                    resolve(fileInfo);
+                });
+            },
+            limits: {
+                fileSize: 2 * 1024 * 1024 * 1024 // 2GB
+            }
+        });
+
+        upload = multer({ storage });
+        console.log('MongoDB connected successfully');
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    }
+}
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -26,45 +75,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Init GridFS
-let gfs;
-conn.once('open', () => {
-    gfs = Grid(conn.db, mongoose.mongo);
-    gfs.collection('uploads');
-});
-
-// Create storage engine with file size limit (2GB like WeTransfer)
-const storage = new GridFsStorage({
-    url: mongoURI,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            const fileId = uuidv4();
-            const filename = fileId + path.extname(file.originalname);
-            const fileInfo = {
-                filename: filename,
-                bucketName: 'uploads',
-                metadata: {
-                    originalName: file.originalname,
-                    uploadDate: new Date(),
-                    fileId: fileId,
-                    expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-                    downloads: 0,
-                    maxDownloads: req.body.maxDownloads || 0, // 0 means unlimited
-                    senderEmail: req.body.senderEmail,
-                    recipientEmail: req.body.recipientEmail,
-                    message: req.body.message
-                }
-            };
-            resolve(fileInfo);
-        });
-    },
-    limits: {
-        fileSize: 2 * 1024 * 1024 * 1024 // 2GB
-    }
-});
-
-const upload = multer({ storage });
-
 // Parse JSON bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -73,37 +83,47 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Enhanced file upload endpoint
-app.post('/upload', upload.single('file'), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
+app.post('/upload', async (req, res) => {
+    if (!upload) {
+        return res.status(500).json({ error: 'Storage not initialized' });
     }
-
-    const fileId = req.file.metadata.fileId;
-    const downloadLink = `${req.protocol}://${req.get('host')}/download/${fileId}`;
-
-    // Send email to recipient if email is provided
-    if (req.body.recipientEmail) {
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: req.body.recipientEmail,
-            subject: `${req.body.senderEmail || 'Someone'} sent you a file`,
-            html: `
-                <h2>You've received a file!</h2>
-                <p>${req.body.message || ''}</p>
-                <p>File: ${req.file.metadata.originalName}</p>
-                <p>Download link: <a href="${downloadLink}">${downloadLink}</a></p>
-                <p>This link will expire in 7 days.</p>
-            `
-        };
-
-        try {
-            await transporter.sendMail(mailOptions);
-        } catch (error) {
-            console.error('Error sending email:', error);
+    
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ error: err.message });
         }
-    }
+        
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
 
-    res.json({ success: true, downloadLink });
+        const fileId = req.file.metadata.fileId;
+        const downloadLink = `${req.protocol}://${req.get('host')}/download/${fileId}`;
+
+        // Send email to recipient if email is provided
+        if (req.body.recipientEmail) {
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: req.body.recipientEmail,
+                subject: `${req.body.senderEmail || 'Someone'} sent you a file`,
+                html: `
+                    <h2>You've received a file!</h2>
+                    <p>${req.body.message || ''}</p>
+                    <p>File: ${req.file.metadata.originalName}</p>
+                    <p>Download link: <a href="${downloadLink}">${downloadLink}</a></p>
+                    <p>This link will expire in 7 days.</p>
+                `
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch (error) {
+                console.error('Error sending email:', error);
+            }
+        }
+
+        res.json({ success: true, downloadLink });
+    });
 });
 
 // Enhanced file download endpoint
@@ -165,6 +185,12 @@ setInterval(async () => {
 }, 60 * 60 * 1000); // Run hourly
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+
+// Initialize MongoDB and start server
+initMongoDB().then(() => {
+    server.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}).catch(err => {
+    console.error('Failed to initialize:', err);
 });
