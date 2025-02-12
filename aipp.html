@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Startup Builder</title>
+    <title>Viral Content Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/@huggingface/inference@1.5.2"></script>
     <style>
         * {
@@ -15,8 +15,8 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            background: #f8fafc;
-            color: #1a1a1a;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,37 +24,41 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
-            background: #ffffff;
+            background: rgba(26, 26, 26, 0.95);
             padding: 60px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         .step-container {
             margin-bottom: 40px;
             padding: 30px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            transition: transform 0.2s ease;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease;
         }
 
         .step-container:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         h1 {
-            color: #4F46E5;
-            font-size: 2.5rem;
+            color: #FF3366;
+            font-size: 3rem;
             margin-bottom: 40px;
             text-align: center;
             font-weight: 700;
+            background: linear-gradient(135deg, #FF3366 0%, #FF6B98 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         h2 {
-            color: #1a1a1a;
+            color: #ffffff;
             font-size: 1.5rem;
             margin-bottom: 20px;
             font-weight: 600;
@@ -63,7 +67,7 @@
         .progress-bar {
             width: 100%;
             height: 8px;
-            background: #e5e7eb;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             margin: 30px 0;
             overflow: hidden;
@@ -72,7 +76,7 @@
         .progress {
             width: 0%;
             height: 100%;
-            background: #4F46E5;
+            background: linear-gradient(90deg, #FF3366, #FF6B98);
             border-radius: 4px;
             transition: width 0.6s ease;
         }
@@ -80,43 +84,50 @@
         textarea {
             width: 100%;
             padding: 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             margin: 10px 0;
             font-size: 1rem;
             resize: vertical;
-            transition: border-color 0.2s ease;
+            transition: all 0.3s ease;
             min-height: 150px;
+            color: #ffffff;
         }
 
         textarea:focus {
             outline: none;
-            border-color: #4F46E5;
+            border-color: #FF3366;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         button {
-            background: #4F46E5;
+            background: linear-gradient(135deg, #FF3366 0%, #FF6B98 100%);
             color: white;
-            padding: 16px 32px;
+            padding: 20px 40px;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
             display: block;
             margin: 40px auto;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 24px rgba(255, 51, 102, 0.3);
         }
 
         button:hover {
-            background: #4338ca;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 51, 102, 0.4);
         }
 
         #output {
             white-space: pre-wrap;
             margin-top: 20px;
             line-height: 1.6;
-            color: #4A5568;
+            color: rgba(255, 255, 255, 0.8);
             font-size: 1rem;
         }
 
@@ -125,20 +136,25 @@
             text-align: center;
             margin: 30px 0;
             font-size: 1.1rem;
-            color: #4F46E5;
+            color: #FF3366;
             font-weight: 500;
         }
 
-        #logoOutput {
-            max-width: 250px;
-            margin: 30px auto;
-            display: block;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
+        .generated-media {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
         }
 
-        #logoOutput:hover {
+        .media-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .media-item:hover {
             transform: scale(1.02);
         }
 
@@ -159,11 +175,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>AI Startup Builder</h1>
+        <h1>Viral Content Generator</h1>
         
         <div class="step-container">
-            <h2>Step 1: Describe Your Startup Idea</h2>
-            <textarea id="ideaInput" rows="5" placeholder="Describe your startup idea in detail..."></textarea>
+            <h2>Enter Your Content Topic</h2>
+            <textarea id="topicInput" rows="5" placeholder="Describe the topic you want to create viral content about..."></textarea>
         </div>
 
         <div class="progress-bar">
@@ -173,13 +189,13 @@
         <div class="step-container">
             <h2>Generated Content</h2>
             <div id="output"></div>
-            <img id="logoOutput" style="display: none;">
+            <div class="generated-media" id="mediaOutput"></div>
             <div class="loading" id="loading">
-                <div>Generating your startup assets...</div>
+                <div>Creating your viral content package...</div>
             </div>
         </div>
 
-        <button onclick="generateContent()">Generate Startup Assets</button>
+        <button onclick="generateContent()">Generate Viral Content</button>
     </div>
 
     <script>
@@ -187,9 +203,9 @@
         const client = new HfInference(HF_TOKEN);
 
         async function generateContent() {
-            const ideaInput = document.getElementById('ideaInput').value;
-            if (!ideaInput) {
-                alert('Please describe your startup idea first!');
+            const topicInput = document.getElementById('topicInput').value;
+            if (!topicInput) {
+                alert('Please enter a topic first!');
                 return;
             }
 
@@ -197,49 +213,62 @@
             document.getElementById('progressBar').style.width = '0%';
 
             try {
-                // Generate business plan using GPT-Neo
+                // Generate viral script using GPT-3.5-turbo
                 updateProgress(20);
-                const businessPlan = await client.textGeneration({
-                    model: 'EleutherAI/gpt-neo-2.7B',
-                    inputs: `Write a detailed business plan for the following startup idea: ${ideaInput}`,
+                const script = await client.textGeneration({
+                    model: 'gpt-3.5-turbo',
+                    inputs: `Create a viral TikTok/YouTube Shorts script about: ${topicInput}. 
+                            Include hooks, trending elements, and engaging narrative structure.`,
                     parameters: {
-                        max_length: 1000,
-                        temperature: 0.7
+                        max_length: 500,
+                        temperature: 0.8
                     }
                 });
 
-                // Summarize market data
+                // Analyze trends using Whisper
                 updateProgress(40);
-                const marketAnalysis = await client.summarization({
-                    model: 'falconsai/text_summarization',
-                    inputs: `Analyze the market potential and competition for: ${ideaInput}`,
-                    parameters: {
-                        max_length: 500
-                    }
+                const trendAnalysis = await client.automaticSpeechRecognition({
+                    model: 'openai/whisper-small',
+                    inputs: `Analyze current viral trends related to: ${topicInput}`,
                 });
 
-                // Generate logo using Stable Diffusion
+                // Generate B-roll images using Stable Diffusion
                 updateProgress(60);
-                const logo = await client.textToImage({
-                    model: 'stabilityai/stable-diffusion-2',
-                    inputs: `Modern minimalist logo for: ${ideaInput}`,
-                    parameters: {
-                        negative_prompt: "text, words, complex, busy",
-                        num_inference_steps: 30,
-                        guidance_scale: 7.5
-                    }
+                const bRollImages = await Promise.all([1, 2, 3].map(async () => {
+                    return await client.textToImage({
+                        model: 'stabilityai/stable-diffusion-2',
+                        inputs: `Cinematic scene for: ${topicInput}`,
+                        parameters: {
+                            negative_prompt: "text, watermark, low quality",
+                            num_inference_steps: 30,
+                            guidance_scale: 7.5
+                        }
+                    });
+                }));
+
+                // Generate AI voice narration
+                updateProgress(80);
+                const voiceNarration = await client.textToSpeech({
+                    model: 'espnet/kan-bayashi_ljspeech_vits',
+                    inputs: script.generated_text
                 });
 
                 updateProgress(100);
 
                 // Display results
                 document.getElementById('output').innerHTML = 
-                    `Business Plan:\n${businessPlan.generated_text}\n\n` +
-                    `Market Analysis:\n${marketAnalysis.summary_text}`;
+                    `📝 Script:\n${script.generated_text}\n\n` +
+                    `📊 Trend Analysis:\n${trendAnalysis.text}\n\n` +
+                    `🎵 Voice narration and B-roll images generated successfully!`;
                 
-                const logoOutput = document.getElementById('logoOutput');
-                logoOutput.src = URL.createObjectURL(logo);
-                logoOutput.style.display = 'block';
+                const mediaOutput = document.getElementById('mediaOutput');
+                mediaOutput.innerHTML = '';
+                bRollImages.forEach(image => {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(image);
+                    img.className = 'media-item';
+                    mediaOutput.appendChild(img);
+                });
 
             } catch (error) {
                 console.error('Error:', error);

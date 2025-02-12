@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StartupAI - Turn Your Idea Into Reality</title>
+    <title>Brevity - AI Video Script Generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -16,96 +16,213 @@
         }
 
         body {
-            background: #f8fafc;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px 20px;
+            color: white;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
-            background: white;
+            background: rgba(26, 26, 26, 0.95);
             padding: 80px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 51, 102, 0.3), transparent);
         }
 
         h1 {
-            font-size: 3rem;
-            color: #1a1a1a;
+            font-size: 4.5rem;
+            color: white;
             margin-bottom: 24px;
-            line-height: 1.2;
-            font-weight: 700;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -1px;
         }
 
         .highlight {
-            color: #4F46E5;
+            background: linear-gradient(135deg, #FF3366 0%, #FF6B98 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 51, 102, 0.6);
         }
 
         p {
-            color: #64748b;
-            font-size: 1.125rem;
+            color: #b3b3b3;
+            font-size: 1.4rem;
             line-height: 1.7;
-            margin-bottom: 48px;
-            max-width: 720px;
+            margin-bottom: 64px;
+            max-width: 800px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 32px;
-            margin-bottom: 48px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-bottom: 64px;
         }
 
         .feature {
-            padding: 32px;
-            background: #f8fafc;
-            border-radius: 12px;
-            transition: transform 0.2s ease;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 51, 102, 0.1), transparent);
         }
 
         .feature:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
         .feature h3 {
-            color: #1a1a1a;
-            margin: 16px 0;
-            font-size: 1.25rem;
+            color: white;
+            margin: 20px 0;
+            font-size: 1.4rem;
             font-weight: 600;
         }
 
         .feature p {
-            color: #64748b;
-            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
             margin-bottom: 0;
+            line-height: 1.6;
         }
 
         .feature-icon {
-            font-size: 2rem;
-            color: #4F46E5;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #FF3366 0%, #FF6B98 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(255, 51, 102, 0.4));
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin: 64px 0;
+            padding: 32px;
+            background: rgba(255, 51, 102, 0.05);
+            border-radius: 16px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #FF3366;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .cta-section {
+            margin-top: 80px;
+            padding: 64px;
+            background: rgba(255, 51, 102, 0.05);
+            border-radius: 24px;
+            text-align: center;
         }
 
         .cta-button {
-            background: #4F46E5;
+            background: linear-gradient(135deg, #FF3366 0%, #FF6B98 100%);
             color: white;
-            padding: 16px 40px;
-            border-radius: 8px;
+            padding: 24px 56px;
+            border-radius: 16px;
             border: none;
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 8px 24px rgba(255, 51, 102, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
 
         .cta-button:hover {
-            background: #4338ca;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(255, 51, 102, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .testimonials {
+            margin: 80px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+        }
+
+        .testimonial {
+            padding: 32px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .testimonial-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-author {
+            color: #FF3366;
+            font-weight: 600;
         }
 
         @media (max-width: 768px) {
@@ -114,10 +231,18 @@
             }
 
             h1 {
-                font-size: 2.25rem;
+                font-size: 2.5rem;
             }
 
             .features {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .testimonials {
                 grid-template-columns: 1fr;
             }
         }
@@ -125,35 +250,78 @@
 </head>
 <body>
     <div class="container">
-        <h1>Transform Your <span class="highlight">Ideas</span> Into <span class="highlight">Successful Startups</span></h1>
-        <p>Harness the power of AI to build your dream startup. Get comprehensive business plans, market insights, and investor-ready materials in minutes, not months.</p>
+        <h1>Transform Ideas Into <span class="highlight">Viral Content</span></h1>
+        <p>Harness the power of artificial intelligence to create compelling TikTok and YouTube Shorts that captivate audiences. Elevate your content strategy with data-driven insights and proven engagement techniques.</p>
         
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">📊</div>
-                <h3>Business Plan</h3>
-                <p>AI-powered strategic roadmap customized for your unique vision</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">500K+</div>
+                <div class="stat-label">Videos Created</div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🎯</div>
-                <h3>Market Research</h3>
-                <p>Data-driven insights to identify your perfect market fit</p>
+            <div class="stat">
+                <div class="stat-number">10M+</div>
+                <div class="stat-label">Views Generated</div>
             </div>
-            <div class="feature">
-                <div class="feature-icon">💰</div>
-                <h3>Monetization</h3>
-                <p>Proven revenue models and pricing strategies</p>
-            </div>
-            <div class="feature">
-                <div class="feature-icon">🚀</div>
-                <h3>Pitch Deck</h3>
-                <p>Compelling presentations that capture investor attention</p>
+            <div class="stat">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">Success Rate</div>
             </div>
         </div>
 
-        <button class="cta-button" onclick="window.location.href='aipp.html'">
-            Launch Your Startup Now →
-        </button>
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Advanced Hook Engine</h3>
+                <p>AI-powered opening sequences that grab attention and maximize viewer retention</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎬</div>
+                <h3>Strategic Formats</h3>
+                <p>Data-backed content structures engineered for maximum algorithmic reach</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔥</div>
+                <h3>Trend Analytics</h3>
+                <p>Real-time trend analysis and predictive content recommendations</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💡</div>
+                <h3>Smart Ideation</h3>
+                <p>AI-powered content ideation based on your niche and audience preferences</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Performance Insights</h3>
+                <p>Detailed analytics and optimization suggestions for your content</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <h3>Visual Enhancement</h3>
+                <p>AI-driven suggestions for visually appealing content creation</p>
+            </div>
+        </div>
+
+        <div class="testimonials">
+            <div class="testimonial">
+                <p class="testimonial-text">"This tool completely transformed my content strategy. My engagement rates have increased by 300% since I started using it."</p>
+                <div class="testimonial-author">- Sarah K., Content Creator</div>
+            </div>
+            <div class="testimonial">
+                <p class="testimonial-text">"The AI suggestions are spot-on. I've gone viral multiple times using the hook generator."</p>
+                <div class="testimonial-author">- Mike R., TikTok Influencer</div>
+            </div>
+            <div class="testimonial">
+                <p class="testimonial-text">"Finally, a tool that actually delivers on its promises. My channel growth has been exponential."</p>
+                <div class="testimonial-author">- Alex M., YouTuber</div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2 style="font-size: 2.5rem; margin-bottom: 32px;">Ready to Go Viral?</h2>
+            <button class="cta-button" onclick="window.location.href='aipp.html'">
+                Start Creating Magic →
+            </button>
+        </div>
     </div>
 
     <script>
