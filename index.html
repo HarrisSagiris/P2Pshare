@@ -3,36 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P File Sharing</title>
+    <title>FileShare - Simple & Secure File Sharing</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary-color: #2962ff;
+            --secondary-color: #0039cb;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .upload-box {
+            border: 2px dashed #ccc;
+            padding: 2rem;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box.dragover {
+            border-color: var(--primary-color);
+            background: rgba(41, 98, 255, 0.05);
+        }
+
+        .upload-area {
+            display: block;
+            cursor: pointer;
+            padding: 2rem;
+        }
+
+        .upload-area span {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--secondary-color);
+        }
+
+        #shareBtn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        #shareLink {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .download-button:hover {
+            background: var(--secondary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #uploadFallback {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        #uploadResult {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+        }
+
+        #uploadResult a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        #uploadResult a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Instant P2P File Sharing</h1>
-        <p>Send files directly between devices using WebRTC.</p>
-        
-        <div class="upload-box">
-            <input type="file" id="fileInput" hidden>
-            <label for="fileInput" class="upload-area">
-                <span>📂 Drag & Drop or Click to Select a File</span>
-            </label>
-            <button id="shareBtn">Share File</button>
-        </div>
+        <h1>FileShare</h1>
+        <p>Fast, secure, and simple file sharing - just like WeTransfer!</p>
 
-        <div id="result" class="hidden">
-            <input type="text" id="shareLink" readonly>
-            <div class="progress-container">
-                <div id="progressBar" class="progress-bar"></div>
+        <div id="hostSection">
+            <div class="upload-box">
+                <input type="file" id="fileInput" hidden>
+                <label for="fileInput" class="upload-area">
+                    <span>📂 Drop your file here or click to browse</span>
+                </label>
+                <button id="shareBtn">Share File</button>
+            </div>
+
+            <div id="result" class="hidden">
+                <p>Your file is ready to share!</p>
+                <input type="text" id="shareLink" readonly>
+                <button onclick="copyShareLink()">Copy Link</button>
+                <div class="progress-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+                <p id="senderStatus"></p>
             </div>
         </div>
 
         <div id="receiveSection" class="hidden">
-            <h2>Receiving File...</h2>
+            <h2>Your file is ready!</h2>
             <div class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
-            <p id="receiverStatus">Waiting for connection...</p>
+            <p id="receiverStatus">Preparing your download...</p>
             <a id="downloadLink" class="hidden download-button" download>Download File</a>
+        </div>
+
+        <div id="uploadFallback" class="hidden">
+            <h3>Using alternative upload method...</h3>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" name="file">
+                <button type="submit">Upload File</button>
+            </form>
+            <div id="uploadResult"></div>
         </div>
     </div>
 
@@ -40,22 +211,53 @@
     <script src="script.js"></script>
 
     <script>
-        // Add drag and drop functionality
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomId = urlParams.get('room');
+        const fileId = urlParams.get('file');
+
+        if (fileId || roomId) {
+            document.getElementById('hostSection').classList.add('hidden');
+            document.getElementById('receiveSection').classList.remove('hidden');
+            
+            if (fileId) {
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = `/download/${fileId}`;
+                downloadLink.classList.remove('hidden');
+                downloadLink.innerText = 'Download File';
+                document.getElementById('receiverStatus').innerText = 'Ready to download!';
+                document.getElementById('progressBar').style.width = '100%';
+            }
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            const originalText = shareLink.nextElementSibling.innerText;
+            shareLink.nextElementSibling.innerText = 'Copied!';
+            setTimeout(() => {
+                shareLink.nextElementSibling.innerText = originalText;
+            }, 2000);
+        }
+
         const uploadArea = document.querySelector('.upload-area');
         const fileInput = document.getElementById('fileInput');
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
         });
 
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
         });
 
         uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
             fileInput.files = e.dataTransfer.files;
             updateFilePreview(e.dataTransfer.files[0]);
         });
@@ -69,9 +271,11 @@
             
             const span = uploadArea.querySelector('span');
             span.innerHTML = `
-                📂 Selected: ${file.name}<br>
-                Size: ${formatFileSize(file.size)}<br>
-                Type: ${file.type || 'Unknown'}
+                <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📂 ${file.name}</div>
+                <div style="color: #666;">
+                    Size: ${formatFileSize(file.size)}<br>
+                    Type: ${file.type || 'Unknown'}
+                </div>
             `;
         }
 
@@ -82,6 +286,40 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const submitButton = e.target.querySelector('button');
+            submitButton.disabled = true;
+            submitButton.innerText = 'Uploading...';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('uploadResult').innerHTML = `
+                        <div style="background: #e8f5e9; padding: 1rem; border-radius: 4px;">
+                            File uploaded successfully! 
+                            <a href="${result.downloadLink}">Download Link</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Upload failed:', error);
+                document.getElementById('uploadResult').innerHTML = `
+                    <div style="background: #ffebee; padding: 1rem; border-radius: 4px;">
+                        Upload failed. Please try again.
+                    </div>
+                `;
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerText = 'Upload File';
+            }
+        });
     </script>
 </body>
 </html>

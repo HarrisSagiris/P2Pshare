@@ -1,5 +1,5 @@
 // Connect to WebSocket server
-const ws = new WebSocket(`ws://${window.location.hostname}:3000`);
+const ws = new WebSocket(`ws://${window.location.host}`);
 
 const peer = new RTCPeerConnection({
     iceServers: [
@@ -14,91 +14,6 @@ const CHUNK_SIZE = 16384;
 let roomId = null;
 let peerId = null;
 
-// Handle WebSocket messages
-ws.onmessage = async (event) => {
-    const data = JSON.parse(event.data);
-    
-    switch(data.type) {
-        case 'room-created':
-            roomId = data.roomId;
-            // Display room ID for sharing
-            const shareLink = document.getElementById('shareLink');
-            shareLink.value = `${window.location.origin}?room=${roomId}`;
-            break;
-
-        case 'peer-joined':
-            peerId = data.peerId;
-            // Create and send offer when peer joins
-            dataChannel = peer.createDataChannel("fileTransfer");
-            dataChannel.binaryType = "arraybuffer";
-            setupSenderDataChannel(dataChannel);
-
-            const offer = await peer.createOffer();
-            await peer.setLocalDescription(offer);
-            ws.send(JSON.stringify({
-                type: 'offer',
-                target: peerId,
-                data: offer
-            }));
-            break;
-
-        case 'offer':
-            document.getElementById('receiveSection').classList.remove('hidden');
-            await peer.setRemoteDescription(new RTCSessionDescription(data.data));
-            const answer = await peer.createAnswer();
-            await peer.setLocalDescription(answer);
-            
-            ws.send(JSON.stringify({
-                type: 'answer',
-                target: data.sender,
-                data: answer
-            }));
-            break;
-
-        case 'answer':
-            await peer.setRemoteDescription(new RTCSessionDescription(data.data));
-            break;
-
-        case 'ice-candidate':
-            try {
-                await peer.addIceCandidate(data.data);
-            } catch (e) {
-                console.error('Error adding received ice candidate', e);
-            }
-            break;
-
-        case 'host-disconnected':
-            alert('Host disconnected');
-            location.reload();
-            break;
-    }
-};
-
-// Handle ICE candidates
-peer.onicecandidate = (event) => {
-    if (event.candidate) {
-        ws.send(JSON.stringify({
-            type: 'ice-candidate',
-            target: peerId,
-            data: event.candidate
-        }));
-    }
-};
-
-// Check URL for room ID and join if present
-window.addEventListener('load', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const roomParam = urlParams.get('room');
-    if (roomParam) {
-        ws.onopen = () => {
-            ws.send(JSON.stringify({
-                type: 'join-room',
-                roomId: roomParam
-            }));
-        };
-    }
-});
-
 // Handle file selection and sharing
 document.getElementById('shareBtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('fileInput');
@@ -109,96 +24,46 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
 
     fileToSend = fileInput.files[0];
     
-    // Create new room
-    ws.send(JSON.stringify({
-        type: 'create-room'
-    }));
+    // Upload file to server
+    const formData = new FormData();
+    formData.append('file', fileToSend);
 
-    document.getElementById('result').classList.remove('hidden');
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById('result').classList.remove('hidden');
+            const shareLink = document.getElementById('shareLink');
+            shareLink.value = result.downloadLink;
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('senderStatus').innerText = 'File uploaded successfully!';
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        document.getElementById('uploadFallback').classList.remove('hidden');
+        document.getElementById('senderStatus').innerText = 'Direct upload failed. Please try the fallback upload.';
+    }
 });
 
-function setupSenderDataChannel(channel) {
-    let offset = 0;
-    
-    channel.onopen = async () => {
-        console.log("Data channel opened");
-        channel.send(JSON.stringify({
-            fileName: fileToSend.name,
-            fileSize: fileToSend.size,
-            fileType: fileToSend.type
-        }));
-
-        const reader = new FileReader();
+// Check URL for download link
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileId = urlParams.get('file');
+    if (fileId) {
+        document.getElementById('hostSection').classList.add('hidden');
+        document.getElementById('receiveSection').classList.remove('hidden');
         
-        const sendChunk = async () => {
-            if (offset >= fileToSend.size) return;
-            
-            const slice = fileToSend.slice(offset, offset + CHUNK_SIZE);
-            reader.readAsArrayBuffer(slice);
-        };
-
-        reader.onload = () => {
-            channel.send(reader.result);
-            offset += reader.result.byteLength;
-            const progress = Math.min((offset / fileToSend.size) * 100, 100);
-            document.getElementById('progressBar').style.width = progress + '%';
-            
-            if (offset < fileToSend.size) {
-                setTimeout(sendChunk, 0);
-            }
-        };
-
-        sendChunk();
-    };
-
-    channel.onerror = (error) => {
-        console.error("Data channel error:", error);
-    };
-}
-
-// Handle receiving data channel
-peer.ondatachannel = event => {
-    console.log("Data channel received");
-    const receiveChannel = event.channel;
-    receiveChannel.binaryType = "arraybuffer";
-
-    let receivedBuffers = [];
-    let receivedSize = 0;
-    let fileInfo = null;
-
-    receiveChannel.onmessage = (event) => {
-        if (typeof event.data === 'string') {
-            fileInfo = JSON.parse(event.data);
-            document.getElementById('receiverStatus').innerText = 
-                `Receiving ${fileInfo.fileName}...`;
-        } else {
-            receivedBuffers.push(event.data);
-            receivedSize += event.data.byteLength;
-            
-            if (fileInfo) {
-                const progress = (receivedSize / fileInfo.fileSize) * 100;
-                document.getElementById('progressBar').style.width = progress + '%';
-                
-                if (receivedSize === fileInfo.fileSize) {
-                    const receivedBlob = new Blob(receivedBuffers, { type: fileInfo.fileType });
-                    const downloadLink = document.getElementById('downloadLink');
-                    downloadLink.href = URL.createObjectURL(receivedBlob);
-                    downloadLink.download = fileInfo.fileName;
-                    downloadLink.classList.remove('hidden');
-                    downloadLink.innerText = `Download ${fileInfo.fileName}`;
-                    document.getElementById('receiverStatus').innerText = "Transfer complete!";
-                }
-            }
-        }
-    };
-
-    receiveChannel.onopen = () => {
-        console.log("Receive channel opened");
-        document.getElementById('receiverStatus').innerText = "Connected! Waiting for file...";
-    };
-
-    receiveChannel.onerror = (error) => {
-        console.error("Data channel error:", error);
-        document.getElementById('receiverStatus').innerText = "Error during transfer!";
-    };
-};
+        const downloadLink = document.getElementById('downloadLink');
+        downloadLink.href = `/download/${fileId}`;
+        downloadLink.classList.remove('hidden');
+        downloadLink.innerText = 'Download File';
+        document.getElementById('receiverStatus').innerText = 'Ready to download!';
+        document.getElementById('progressBar').style.width = '100%';
+    }
+});
