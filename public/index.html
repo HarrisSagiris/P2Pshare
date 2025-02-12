@@ -9,70 +9,88 @@
     <style>
         :root {
             --primary-color: #0066FF;
-            --secondary-color: #0052CC;
-            --accent-color: #66B2FF;
-            --background-color: #F5F7FA;
+            --primary-hover: #0052CC;
+            --primary-light: #E6F0FF;
+            --secondary-color: #667085;
+            --success-color: #12B76A;
+            --error-color: #F04438;
+            --background-color: #F9FAFB;
             --surface-color: #FFFFFF;
-            --text-color: #1D2939;
-            --text-muted: #667085;
+            --text-primary: #1D2939;
+            --text-secondary: #475467;
+            --border-color: #E5E7EB;
+            --border-radius-sm: 8px;
             --border-radius: 12px;
-            --box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+            --border-radius-lg: 16px;
+            --box-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+            --box-shadow: 0 4px 6px -1px rgba(16, 24, 40, 0.1), 0 2px 4px -1px rgba(16, 24, 40, 0.06);
+            --box-shadow-lg: 0 20px 25px -5px rgba(16, 24, 40, 0.1), 0 10px 10px -5px rgba(16, 24, 40, 0.04);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--background-color);
-            color: var(--text-color);
+            color: var(--text-primary);
             line-height: 1.5;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 2rem 1rem;
         }
 
         .container {
-            width: 95%;
+            width: 100%;
             max-width: 800px;
-            margin: 2rem;
-            padding: 2rem;
             background: var(--surface-color);
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-lg);
             box-shadow: var(--box-shadow);
-            border: 1px solid #E5E7EB;
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            margin: 1rem;
         }
 
         h1 {
-            font-size: 2.25rem;
+            font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
-            margin-bottom: 0.75rem;
-            color: var(--text-color);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
         }
 
-        p {
+        .subtitle {
             text-align: center;
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            margin-bottom: 3rem;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .upload-box {
-            border: 2px dashed #E5E7EB;
-            padding: 2rem;
-            text-align: center;
+            border: 2px dashed var(--border-color);
             border-radius: var(--border-radius);
+            padding: 2.5rem;
+            text-align: center;
+            background: var(--background-color);
+            transition: var(--transition);
             margin-bottom: 2rem;
-            transition: all 0.2s ease;
-            background: #F9FAFB;
         }
 
         .upload-box.dragover {
             border-color: var(--primary-color);
-            background: #F0F7FF;
+            background: var(--primary-light);
         }
 
         .upload-area {
@@ -80,46 +98,72 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 1.5rem;
+            min-height: 240px;
             cursor: pointer;
             padding: 2rem;
-            min-height: 200px;
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
         }
 
-        .upload-area span {
-            font-size: 1rem;
-            color: var(--text-muted);
-            margin-top: 1rem;
+        .upload-area:hover {
+            background: rgba(0, 102, 255, 0.04);
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--primary-color);
+            opacity: 0.9;
+        }
+
+        .upload-text {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
-        button {
+        .upload-hint {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+
+        .button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
+            padding: 0.875rem 1.75rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 600;
+            font-size: 0.9375rem;
             cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--box-shadow-sm);
         }
 
-        button:hover {
-            background: var(--secondary-color);
+        .button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
         }
 
         #shareBtn {
             width: 100%;
             max-width: 200px;
             margin: 1.5rem auto 0;
-            display: block;
         }
 
         .progress-container {
             width: 100%;
-            height: 4px;
-            background: #F0F7FF;
+            height: 6px;
+            background: var(--primary-light);
             border-radius: 100px;
             margin: 1.5rem 0;
             overflow: hidden;
@@ -128,114 +172,125 @@
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: var(--primary-color);
+            background: linear-gradient(90deg, var(--primary-color), #3B82F6);
             transition: width 0.3s ease;
             border-radius: 100px;
         }
 
-        #shareLink {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #E5E7EB;
-            border-radius: 6px;
-            margin: 1rem 0;
-            font-size: 0.875rem;
-            color: var(--text-color);
-            background: #F9FAFB;
-            transition: all 0.2s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        #shareLink:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px #E6F0FF;
-        }
-
-        .download-button {
-            display: inline-block;
-            background: var(--primary-color);
-            color: white;
-            text-decoration: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            margin-top: 1.5rem;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
-
-        .download-button:hover {
-            background: var(--secondary-color);
-        }
-
-        .hidden {
-            display: none;
-        }
-
         .share-dialog {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             background: var(--surface-color);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid #E5E7EB;
-            z-index: 1000;
+            padding: 2rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--box-shadow-lg);
+            border: 1px solid var(--border-color);
             width: 90%;
-            max-width: 400px;
+            max-width: 480px;
         }
 
         .share-dialog h3 {
-            margin-top: 0;
-            color: var(--text-color);
-            font-size: 1.125rem;
+            color: var(--text-primary);
+            font-size: 1.25rem;
             font-weight: 600;
+            margin-bottom: 1.5rem;
         }
 
         .share-options {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-            margin: 1rem 0;
+            gap: 1rem;
+            margin: 1.5rem 0;
         }
 
         .share-option {
-            padding: 0.75rem;
-            border-radius: 6px;
-            background: #F9FAFB;
-            border: 1px solid #E5E7EB;
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
             cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .share-option:hover {
-            background: #F0F7FF;
+            background: var(--primary-light);
             border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .share-option-icon {
+            font-size: 1.5rem;
+        }
+
+        .share-option-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        #shareLink {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            background: var(--background-color);
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        #shareLink:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(16, 24, 40, 0.6);
             backdrop-filter: blur(4px);
-            z-index: 999;
+        }
+
+        .file-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.5rem;
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin: 1rem 0;
+        }
+
+        .file-preview-icon {
+            width: 40px;
+            height: 40px;
+            color: var(--primary-color);
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .file-size {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
         @media (max-width: 768px) {
             .container {
-                margin: 1rem;
                 padding: 1.5rem;
             }
 
             h1 {
-                font-size: 1.875rem;
+                font-size: 2rem;
             }
 
             .upload-box {
@@ -243,21 +298,29 @@
             }
 
             .upload-area {
-                min-height: 150px;
+                min-height: 200px;
+            }
+
+            .share-dialog {
+                padding: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
             h1 {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
             }
 
-            p {
-                font-size: 0.875rem;
+            .subtitle {
+                font-size: 1rem;
             }
 
             .upload-box {
                 padding: 1rem;
+            }
+
+            .share-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -265,40 +328,46 @@
 <body>
     <div class="container">
         <h1>TapShare</h1>
-        <p>Simple, secure file sharing for teams. Just drag, drop, and share.</p>
+        <p class="subtitle">Secure, fast, and simple file sharing for teams. Just drag, drop, and share.</p>
 
         <div id="hostSection">
             <div class="upload-box">
                 <input type="file" id="fileInput" hidden>
                 <label for="fileInput" class="upload-area">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5V19M5 12H19" stroke="#0066FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span>Drop files here or click to upload</span>
+                    <div class="upload-text">Drop files here or click to upload</div>
+                    <div class="upload-hint">Supports any file type up to 2GB</div>
                 </label>
-                <button id="shareBtn">
+                <button id="shareBtn" class="button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                        <polyline points="16 6 12 2 8 6"/>
+                        <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
                     <span>Share File</span>
                 </button>
             </div>
 
             <div id="result" class="hidden">
                 <div class="share-dialog">
-                    <h3>Share File</h3>
+                    <h3>Share Your File</h3>
                     <div class="share-options">
                         <div class="share-option" onclick="copyShareLink()">
-                            <div>📋</div>
-                            <span>Copy</span>
+                            <div class="share-option-icon">📋</div>
+                            <span class="share-option-text">Copy Link</span>
                         </div>
                         <div class="share-option" onclick="shareViaEmail()">
-                            <div>📧</div>
-                            <span>Email</span>
+                            <div class="share-option-icon">📧</div>
+                            <span class="share-option-text">Email</span>
                         </div>
                         <div class="share-option" onclick="shareViaQR()">
-                            <div>📱</div>
-                            <span>QR</span>
+                            <div class="share-option-icon">📱</div>
+                            <span class="share-option-text">QR Code</span>
                         </div>
                     </div>
-                    <input type="text" id="shareLink" readonly>
+                    <input type="text" id="shareLink" readonly placeholder="Generating share link...">
                     <div class="progress-container">
                         <div id="progressBar" class="progress-bar"></div>
                     </div>
@@ -314,14 +383,21 @@
                 <div id="progressBar" class="progress-bar"></div>
             </div>
             <p id="receiverStatus">Preparing download...</p>
-            <a id="downloadLink" class="hidden download-button" download>Download File</a>
+            <a id="downloadLink" class="button hidden" download>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Download File</span>
+            </a>
         </div>
 
         <div id="uploadFallback" class="hidden">
             <h3>Alternative Upload Method</h3>
             <form id="uploadForm" enctype="multipart/form-data">
                 <input type="file" name="file">
-                <button type="submit">Upload</button>
+                <button type="submit" class="button">Upload</button>
             </form>
             <div id="uploadResult"></div>
         </div>
@@ -331,7 +407,7 @@
     <script src="script.js"></script>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
+                const urlParams = new URLSearchParams(window.location.search);
         const roomId = urlParams.get('room');
         const fileId = urlParams.get('file');
 
