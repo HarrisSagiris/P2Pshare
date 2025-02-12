@@ -21,19 +21,57 @@
 
         <div id="result" class="hidden">
             <p>Share this link:</p>
-            <input type="text" id="shareLink" readonly>
-            <button id="copyBtn">Copy</button>
+            <div class="share-container">
+                <input type="text" id="shareLink" readonly>
+                <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
+            </div>
             <div id="qrCode"></div>
         </div>
 
         <div id="receiveSection" class="hidden">
             <h2>Receiving File...</h2>
-            <p id="receiverStatus">Waiting for connection...</p>
-            <a id="downloadLink" class="hidden" download>Download File</a>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-bar"></div>
+                <p id="receiverStatus">Waiting for connection...</p>
+            </div>
+            <a id="downloadLink" class="hidden download-button" download>Download File</a>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
     <script src="script.js"></script>
+
+    <script>
+        function copyToClipboard() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 2000);
+        }
+
+        // Add drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            fileInput.files = e.dataTransfer.files;
+        });
+    </script>
 </body>
 </html>
