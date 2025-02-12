@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const http = require('http');
 const express = require('express');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -8,6 +9,11 @@ const wss = new WebSocket.Server({ server });
 
 // Serve static files from 'public' directory
 app.use(express.static('public'));
+
+// Serve index.html for root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // WebSocket connection handling
 wss.on('connection', (ws) => {
