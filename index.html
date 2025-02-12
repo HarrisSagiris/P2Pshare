@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StartupAI - Turn Your Idea Into Reality</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            padding: 80px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #1a1a1a;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .highlight {
+            color: #4F46E5;
+        }
+
+        p {
+            color: #64748b;
+            font-size: 1.125rem;
+            line-height: 1.7;
+            margin-bottom: 48px;
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .feature {
+            padding: 32px;
+            background: #f8fafc;
+            border-radius: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature h3 {
+            color: #1a1a1a;
+            margin: 16px 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .feature p {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #4F46E5;
+        }
+
+        .cta-button {
+            background: #4F46E5;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .cta-button:hover {
+            background: #4338ca;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 24px;
+            }
+
+            h1 {
+                font-size: 2.25rem;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Transform Your <span class="highlight">Ideas</span> Into <span class="highlight">Successful Startups</span></h1>
+        <p>Harness the power of AI to build your dream startup. Get comprehensive business plans, market insights, and investor-ready materials in minutes, not months.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Business Plan</h3>
+                <p>AI-powered strategic roadmap customized for your unique vision</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎯</div>
+                <h3>Market Research</h3>
+                <p>Data-driven insights to identify your perfect market fit</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <h3>Monetization</h3>
+                <p>Proven revenue models and pricing strategies</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚀</div>
+                <h3>Pitch Deck</h3>
+                <p>Compelling presentations that capture investor attention</p>
+            </div>
+        </div>
+
+        <button class="cta-button" onclick="window.location.href='aipp.html'">
+            Launch Your Startup Now →
+        </button>
+    </div>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

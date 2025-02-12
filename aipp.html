@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Startup Builder</title>
+    <script src="https://cdn.jsdelivr.net/npm/@huggingface/inference@1.5.2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background: #f8fafc;
+            color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #ffffff;
+            padding: 60px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .step-container {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease;
+        }
+
+        .step-container:hover {
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            color: #4F46E5;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: #1a1a1a;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: #4F46E5;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+            min-height: 150px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+        }
+
+        button {
+            background: #4F46E5;
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: block;
+            margin: 40px auto;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        #output {
+            white-space: pre-wrap;
+            margin-top: 20px;
+            line-height: 1.6;
+            color: #4A5568;
+            font-size: 1rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.1rem;
+            color: #4F46E5;
+            font-weight: 500;
+        }
+
+        #logoOutput {
+            max-width: 250px;
+            margin: 30px auto;
+            display: block;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        #logoOutput:hover {
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Startup Builder</h1>
+        
+        <div class="step-container">
+            <h2>Step 1: Describe Your Startup Idea</h2>
+            <textarea id="ideaInput" rows="5" placeholder="Describe your startup idea in detail..."></textarea>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progressBar"></div>
+        </div>
+
+        <div class="step-container">
+            <h2>Generated Content</h2>
+            <div id="output"></div>
+            <img id="logoOutput" style="display: none;">
+            <div class="loading" id="loading">
+                <div>Generating your startup assets...</div>
+            </div>
+        </div>
+
+        <button onclick="generateContent()">Generate Startup Assets</button>
+    </div>
+
+    <script>
+        const HF_TOKEN = "YOUR_HUGGINGFACE_TOKEN"; // Replace with your token
+        const client = new HfInference(HF_TOKEN);
+
+        async function generateContent() {
+            const ideaInput = document.getElementById('ideaInput').value;
+            if (!ideaInput) {
+                alert('Please describe your startup idea first!');
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+
+            try {
+                // Generate business plan using GPT-Neo
+                updateProgress(20);
+                const businessPlan = await client.textGeneration({
+                    model: 'EleutherAI/gpt-neo-2.7B',
+                    inputs: `Write a detailed business plan for the following startup idea: ${ideaInput}`,
+                    parameters: {
+                        max_length: 1000,
+                        temperature: 0.7
+                    }
+                });
+
+                // Summarize market data
+                updateProgress(40);
+                const marketAnalysis = await client.summarization({
+                    model: 'falconsai/text_summarization',
+                    inputs: `Analyze the market potential and competition for: ${ideaInput}`,
+                    parameters: {
+                        max_length: 500
+                    }
+                });
+
+                // Generate logo using Stable Diffusion
+                updateProgress(60);
+                const logo = await client.textToImage({
+                    model: 'stabilityai/stable-diffusion-2',
+                    inputs: `Modern minimalist logo for: ${ideaInput}`,
+                    parameters: {
+                        negative_prompt: "text, words, complex, busy",
+                        num_inference_steps: 30,
+                        guidance_scale: 7.5
+                    }
+                });
+
+                updateProgress(100);
+
+                // Display results
+                document.getElementById('output').innerHTML = 
+                    `Business Plan:\n${businessPlan.generated_text}\n\n` +
+                    `Market Analysis:\n${marketAnalysis.summary_text}`;
+                
+                const logoOutput = document.getElementById('logoOutput');
+                logoOutput.src = URL.createObjectURL(logo);
+                logoOutput.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').innerHTML = 'An error occurred. Please try again.';
+            }
+
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function updateProgress(percentage) {
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+    </script>
+</body>
+</html>
