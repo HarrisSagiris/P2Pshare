@@ -34,7 +34,21 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
             
             // Set share link with file ID
             const shareLink = document.getElementById('shareLink');
-            shareLink.value = `${window.location.origin}?file=${data.fileId}`;
+            const shareLinkUrl = `${window.location.origin}?file=${data.fileId}`;
+            shareLink.value = shareLinkUrl;
+
+            // Generate and display QR code
+            const qrCodeContainer = document.getElementById('qrCode');
+            qrCodeContainer.innerHTML = ''; // Clear previous QR code if any
+            
+            new QRCode(qrCodeContainer, {
+                text: shareLinkUrl,
+                width: 128,
+                height: 128,
+                colorDark: "#FFFFFF",
+                colorLight: "#1F2937",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         });
 
         socket.on('peer-joined', (peerId) => {
