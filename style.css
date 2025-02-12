@@ -1,0 +1,84 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+    margin: 0;
+}
+
+/* Container */
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    color: #333;
+}
+
+/* Upload Box */
+.upload-box {
+    margin: 20px 0;
+}
+
+.upload-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    background: #f4f4f4;
+    border: 2px dashed #aaa;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px;
+    text-align: center;
+}
+
+.upload-area:hover {
+    background: #e0e0e0;
+}
+
+/* Button */
+button {
+    margin-top: 10px;
+    padding: 12px 18px;
+    border: none;
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Results */
+#result {
+    margin-top: 20px;
+}
+
+#shareLink {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+}
+
+#qrCode {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}

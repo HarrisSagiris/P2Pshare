@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P File Sharing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Instant P2P File Sharing</h1>
+        <p>Send files directly between devices using WebRTC.</p>
+        
+        <div class="upload-box">
+            <input type="file" id="fileInput" hidden>
+            <label for="fileInput" class="upload-area">
+                <span>📂 Drag & Drop or Click to Select a File</span>
+            </label>
+            <button id="shareBtn">Generate Link</button>
+        </div>
+
+        <div id="result" class="hidden">
+            <p>Share this link:</p>
+            <input type="text" id="shareLink" readonly>
+            <button id="copyBtn">Copy</button>
+            <div id="qrCode"></div>
+        </div>
+
+        <div id="receiveSection" class="hidden">
+            <h2>Receiving File...</h2>
+            <p id="receiverStatus">Waiting for connection...</p>
+            <a id="downloadLink" class="hidden" download>Download File</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
