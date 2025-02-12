@@ -3,70 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FileShare - Simple & Secure File Sharing</title>
+    <title>TapShare - Enterprise File Transfer Solution</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #409fff;
-            --secondary-color: #0073e6;
-            --background-color: #f0f5ff;
-            --text-color: #1a1a1a;
-            --border-radius: 12px;
-            --box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            --primary-color: #2563eb;
+            --secondary-color: #1d4ed8; 
+            --accent-color: #60a5fa;
+            --background-color: #f8fafc;
+            --text-color: #0f172a;
+            --border-radius: 16px;
+            --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             min-height: 100vh;
             background: var(--background-color);
             color: var(--text-color);
-            line-height: 1.6;
+            line-height: 1.7;
             display: flex;
             align-items: center;
             justify-content: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(96, 165, 250, 0.05) 0%, transparent 50%);
         }
 
         .container {
-            width: 90%;
-            max-width: 900px;
+            width: 95%;
+            max-width: 1100px;
             margin: 2rem;
-            padding: 3rem;
+            padding: 3.5rem;
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 800;
             text-align: center;
             color: var(--text-color);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         p {
             text-align: center;
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
+            color: #64748b;
+            font-size: 1.15rem;
+            margin-bottom: 3.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .upload-box {
-            border: 3px dashed #e0e0e0;
-            padding: 3rem;
+            border: 2px dashed #e2e8f0;
+            padding: 3.5rem;
             text-align: center;
             border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            background: #fafafa;
+            margin-bottom: 2.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            position: relative;
         }
 
         .upload-box.dragover {
             border-color: var(--primary-color);
-            background: rgba(64, 159, 255, 0.05);
-            transform: scale(1.02);
+            background: rgba(37, 99, 235, 0.03);
+            transform: scale(1.01);
         }
 
         .upload-area {
@@ -75,75 +99,118 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            padding: 2rem;
-            min-height: 200px;
+            padding: 2.5rem;
+            min-height: 250px;
+            position: relative;
         }
 
         .upload-area span {
-            font-size: 1.2rem;
-            color: #444;
-            margin-top: 1rem;
+            font-size: 1.25rem;
+            color: #334155;
+            margin-top: 1.5rem;
+            font-weight: 500;
         }
 
         button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
+            padding: 1.25rem 2.5rem;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 1.1rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(64, 159, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         button:hover {
             background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(64, 159, 255, 0.4);
+            box-shadow: 0 6px 25px rgba(37, 99, 235, 0.35);
+        }
+
+        button:hover::after {
+            opacity: 1;
         }
 
         #shareBtn {
             width: 100%;
-            max-width: 300px;
-            margin: 2rem auto 0;
+            max-width: 350px;
+            margin: 2.5rem auto 0;
             display: block;
         }
 
         .progress-container {
             width: 100%;
-            height: 12px;
-            background: #f5f5f5;
-            border-radius: 6px;
-            margin: 1.5rem 0;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 100px;
+            margin: 2rem 0;
             overflow: hidden;
         }
 
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            transition: width 0.3s ease;
-            border-radius: 6px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 100px;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.15) 50%,
+                rgba(255,255,255,0) 100%
+            );
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         #shareLink {
             width: 100%;
-            padding: 1rem;
-            border: 2px solid #eee;
-            border-radius: var(--border-radius);
-            margin: 1rem 0;
+            padding: 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin: 1.5rem 0;
             font-size: 1.1rem;
             color: var(--text-color);
-            background: #fafafa;
+            background: #ffffff;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         #shareLink:focus {
             border-color: var(--primary-color);
             outline: none;
-            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .download-button {
@@ -151,18 +218,20 @@
             background: var(--primary-color);
             color: white;
             text-decoration: none;
-            padding: 1.2rem 3rem;
-            border-radius: var(--border-radius);
-            margin-top: 1.5rem;
-            transition: all 0.3s ease;
+            padding: 1.4rem 3.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(64, 159, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
+            position: relative;
+            overflow: hidden;
         }
 
         .download-button:hover {
             background: var(--secondary-color);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(64, 159, 255, 0.4);
+            box-shadow: 0 6px 25px rgba(37, 99, 235, 0.35);
         }
 
         .hidden {
@@ -170,22 +239,22 @@
         }
 
         #uploadFallback {
-            margin-top: 3rem;
-            padding: 2rem;
-            border: 1px solid #eee;
+            margin-top: 3.5rem;
+            padding: 2.5rem;
+            border: 1px solid #e2e8f0;
             border-radius: var(--border-radius);
-            background: #fafafa;
+            background: #ffffff;
         }
 
         #uploadResult {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
+            margin-top: 2rem;
+            padding: 2rem;
             border-radius: var(--border-radius);
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -193,67 +262,121 @@
             color: var(--primary-color);
             text-decoration: none;
             font-weight: 500;
+            position: relative;
         }
 
-        #uploadResult a:hover {
-            text-decoration: underline;
+        #uploadResult a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        #uploadResult a:hover::after {
+            transform: scaleX(1);
         }
 
         .file-preview {
-            background: #fafafa;
-            padding: 1.5rem;
+            background: #f8fafc;
+            padding: 2rem;
             border-radius: var(--border-radius);
-            margin: 1rem 0;
+            margin: 1.5rem 0;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .file-preview:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
 
         .file-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .container {
                 margin: 1rem;
-                padding: 1.5rem;
+                padding: 2rem;
             }
 
             h1 {
+                font-size: 2.5rem;
+            }
+
+            .upload-box {
+                padding: 2rem;
+            }
+
+            .upload-area {
+                min-height: 200px;
+            }
+
+            button {
+                padding: 1rem 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
                 font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
             }
 
             .upload-box {
                 padding: 1.5rem;
             }
 
-            .upload-area {
-                min-height: 150px;
+            .file-icon {
+                font-size: 2.5rem;
+                width: 60px;
+                height: 60px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>FileShare</h1>
-        <p>Fast, secure, and simple file sharing - just like WeTransfer!</p>
+        <h1>TapShare</h1>
+        <p>Enterprise-grade file sharing platform with military-grade encryption and lightning-fast transfer speeds.</p>
 
         <div id="hostSection">
             <div class="upload-box">
                 <input type="file" id="fileInput" hidden>
                 <label for="fileInput" class="upload-area">
-                    <div class="file-icon">📂</div>
-                    <span>Drop your file here or click to browse</span>
+                    <div class="file-icon">📤</div>
+                    <span>Drag & drop your files here or click to browse</span>
                 </label>
-                <button id="shareBtn">Share File</button>
+                <button id="shareBtn">
+                    <span>Share Securely</span>
+                </button>
             </div>
 
             <div id="result" class="hidden">
-                <p>Your file is ready to share!</p>
+                <p>Your file is ready for secure sharing!</p>
                 <input type="text" id="shareLink" readonly>
-                <button onclick="copyShareLink()">Copy Link</button>
+                <button onclick="copyShareLink()">Copy Secure Link</button>
                 <div class="progress-container">
                     <div id="progressBar" class="progress-bar"></div>
                 </div>
@@ -262,19 +385,19 @@
         </div>
 
         <div id="receiveSection" class="hidden">
-            <h2>Your file is ready!</h2>
+            <h2>Your secure file is ready!</h2>
             <div class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
-            <p id="receiverStatus">Preparing your download...</p>
-            <a id="downloadLink" class="hidden download-button" download>Download File</a>
+            <p id="receiverStatus">Preparing your secure download...</p>
+            <a id="downloadLink" class="hidden download-button" download>Download Securely</a>
         </div>
 
         <div id="uploadFallback" class="hidden">
-            <h3>Using alternative upload method...</h3>
+            <h3>Using enterprise upload method...</h3>
             <form id="uploadForm" enctype="multipart/form-data">
                 <input type="file" name="file">
-                <button type="submit">Upload File</button>
+                <button type="submit">Upload Securely</button>
             </form>
             <div id="uploadResult"></div>
         </div>
@@ -296,8 +419,8 @@
                 const downloadLink = document.getElementById('downloadLink');
                 downloadLink.href = `/download/${fileId}`;
                 downloadLink.classList.remove('hidden');
-                downloadLink.innerText = 'Download File';
-                document.getElementById('receiverStatus').innerText = 'Ready to download!';
+                downloadLink.innerText = 'Download Securely';
+                document.getElementById('receiverStatus').innerText = 'Your file is ready for secure download!';
                 document.getElementById('progressBar').style.width = '100%';
             }
         }
@@ -307,7 +430,7 @@
             shareLink.select();
             document.execCommand('copy');
             const originalText = shareLink.nextElementSibling.innerText;
-            shareLink.nextElementSibling.innerText = 'Copied!';
+            shareLink.nextElementSibling.innerText = 'Link Copied!';
             setTimeout(() => {
                 shareLink.nextElementSibling.innerText = originalText;
             }, 2000);
@@ -346,8 +469,8 @@
             span.innerHTML = `
                 <div class="file-preview">
                     <div class="file-icon">📄</div>
-                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem; font-weight: 500;">${file.name}</div>
-                    <div style="color: #666;">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.75rem; font-weight: 600;">${file.name}</div>
+                    <div style="color: #64748b;">
                         Size: ${formatFileSize(file.size)}<br>
                         Type: ${file.type || 'Unknown'}
                     </div>
@@ -378,22 +501,22 @@
                 const result = await response.json();
                 if (result.success) {
                     document.getElementById('uploadResult').innerHTML = `
-                        <div style="background: #e8f5e9; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="background: #ecfdf5; padding: 2rem; border-radius: var(--border-radius); box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
                             File uploaded successfully! 
-                            <a href="${result.downloadLink}">Download Link</a>
+                            <a href="${result.downloadLink}">Secure Download Link</a>
                         </div>
                     `;
                 }
             } catch (error) {
                 console.error('Upload failed:', error);
                 document.getElementById('uploadResult').innerHTML = `
-                    <div style="background: #ffebee; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <div style="background: #fef2f2; padding: 2rem; border-radius: var(--border-radius); box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
                         Upload failed. Please try again.
                     </div>
                 `;
             } finally {
                 submitButton.disabled = false;
-                submitButton.innerText = 'Upload File';
+                submitButton.innerText = 'Upload Securely';
             }
         });
     </script>
