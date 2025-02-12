@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 
 // MongoDB connection
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/filetransfer';
+const mongoURI = process.env.MONGODB_URI || 'mongodb+srv://appleidmusic960:Dataking8@tapsidecluster.oeofi.mongodb.net/';
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true });
 const conn = mongoose.connection;
 
