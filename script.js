@@ -1,7 +1,10 @@
 const peer = new RTCPeerConnection({
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' }
     ]
 });
 let dataChannel;
@@ -28,34 +31,28 @@ document.getElementById('shareBtn').addEventListener('click', async () => {
         const offer = await peer.createOffer();
         await peer.setLocalDescription(offer);
         
-        // Wait for ICE gathering to complete
-        await new Promise(resolve => {
-            if (peer.iceGatheringState === 'complete') {
-                resolve();
-            } else {
-                peer.addEventListener('icegatheringstatechange', () => {
-                    if (peer.iceGatheringState === 'complete') {
-                        resolve();
-                    }
+        // Add ICE candidate handling
+        peer.onicecandidate = (event) => {
+            if (event.candidate === null) {
+                // ICE gathering completed
+                const link = `${window.location.origin}?offer=${btoa(JSON.stringify(peer.localDescription))}`;
+                document.getElementById('shareLink').value = link;
+                document.getElementById('result').classList.remove('hidden');
+
+                // Generate QR code
+                const qrCodeDiv = document.getElementById('qrCode');
+                qrCodeDiv.innerHTML = '';
+                new QRCode(qrCodeDiv, {
+                    text: link,
+                    width: 256,
+                    height: 256,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
                 });
             }
-        });
+        };
 
-        const link = `${window.location.origin}?offer=${btoa(JSON.stringify(peer.localDescription))}`;
-        document.getElementById('shareLink').value = link;
-        document.getElementById('result').classList.remove('hidden');
-
-        // Generate QR code with error correction level 'H' for better reliability
-        const qrCodeDiv = document.getElementById('qrCode');
-        qrCodeDiv.innerHTML = '';
-        new QRCode(qrCodeDiv, {
-            text: link,
-            width: 256,
-            height: 256,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
     } catch (err) {
         console.error("Error creating offer:", err);
         alert("Failed to create connection. Please try again.");
@@ -66,6 +63,7 @@ function setupSenderDataChannel(channel) {
     let offset = 0;
     
     channel.onopen = async () => {
+        console.log("Data channel opened");
         // First send the file metadata
         channel.send(JSON.stringify({
             fileName: fileToSend.name,
@@ -97,6 +95,10 @@ function setupSenderDataChannel(channel) {
 
         sendChunk();
     };
+
+    channel.onerror = (error) => {
+        console.error("Data channel error:", error);
+    };
 }
 
 // Handle receiving connection
@@ -105,6 +107,13 @@ if (urlParams.has('offer')) {
     try {
         const offer = JSON.parse(atob(urlParams.get('offer')));
         document.getElementById('receiveSection').classList.remove('hidden');
+
+        peer.onicecandidate = (event) => {
+            if (event.candidate === null) {
+                // Send answer back (in real app, this would go through your signaling server)
+                console.log("ICE gathering completed for receiver");
+            }
+        };
 
         peer.setRemoteDescription(new RTCSessionDescription(offer))
             .then(() => peer.createAnswer())
@@ -119,6 +128,7 @@ if (urlParams.has('offer')) {
         let fileInfo = null;
 
         peer.ondatachannel = event => {
+            console.log("Data channel received");
             const receiveChannel = event.channel;
             receiveChannel.binaryType = "arraybuffer";
 
@@ -152,6 +162,7 @@ if (urlParams.has('offer')) {
             };
 
             receiveChannel.onopen = () => {
+                console.log("Receive channel opened");
                 document.getElementById('receiverStatus').innerText = "Connected! Waiting for file...";
             };
 
